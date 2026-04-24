@@ -42,11 +42,15 @@ app.get("/verify", async (req, res) => {
   // ⏳ give 24hr access
   const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-  await supabase.from("users").upsert({
-    user_id: userId,
+  const { error } = await supabase
+  .from("users")
+  .update({
     verified: true,
-    expiry: expiry.toISOString(),
-  });
+    expiry: expiry.toISOString()
+  })
+  .eq("user_id", userId);
+
+  console.log("UPDATE ERROR:", error);
 
   // ✅ redirect back to bot
   const botLink = `https://t.me/${process.env.BOT_USERNAME}?start=${code}`;
